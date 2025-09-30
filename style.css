@@ -82,3 +82,15 @@ th{position:sticky;top:0;background:var(--bg);backdrop-filter: blur(6px);z-index
 .history-entry {padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.08);}
 .history-entry strong {color:#99fa7e;}
 .history-empty {opacity:0.6;text-align:center;padding:20px;}
+.swal2-popup.swal2-ios-like .swal2-confirm {
+  background-color: #049c44 !important;
+  border-radius: 10px;
+  padding: 8px 18px;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  transition: all 0.2s ease;
+}
+.swal2-popup.swal2-ios-like .swal2-confirm:hover {
+  background-color: #037a36 !important;
+}
+

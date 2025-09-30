@@ -122,13 +122,13 @@ async function performDraw(){
     confetti({particleCount: 120, spread: 140, origin: { y: 0.6 }});
 
     const html = winners.map((w,i)=>`<div style="margin:8px 0">
-    <strong style="font-size:16px">#${i+1} ${w.Nombre}</strong>
+    <strong style="font-size:45px">#${i+1} ${w.Nombre}</strong>
     <div style="font-size:13px;opacity:0.85">${w.Categoria} - ${w.Area} - ${w.Asistencia}</div>
     </div>`).join('');
 
     await Swal.fire({
       title: '🎉 ¡Ganador' + (winners.length>1? 'es':'') + '! 🎉',
-      html: `<div style="text-align:left">${html}</div>`,
+      html: `<div style="text-align:center">${html}</div>`,
       showCloseButton: true,
       confirmButtonText: 'Cerrar',
       width: 700,

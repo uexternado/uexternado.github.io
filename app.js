@@ -23,7 +23,8 @@ function renderHistory(logRaw){
   panel.innerHTML = blocks.map(b=>{
     const lines = b.trim().split('\n');
     const title = lines.shift();
-    return `<div class="history-entry"><strong>${title}</strong><br>${lines.join('<br>')}</div>`;
+    const names = lines.map(l=> l.replace(/^🏆 /,'').split('|')[0].trim());
+    return `<div class="history-entry"><strong>${title}</strong><br>${names.join('<br>')}</div>`;
   }).join('');
 }
 
@@ -37,40 +38,32 @@ function parseCSVFile(file){
   return new Promise((resolve,reject)=>{ Papa.parse(file,{header:true,skipEmptyLines:true,complete:(res)=>{resolve(res.data);},error:reject}); });
 }
 function normalizeRow(row){
-  const mapKey = k=>k?k.trim().toLowerCase():''; 
+  const mapKey = k=>k?k.trim().toLowerCase():'';
   const normalized = {};
   const keys = Object.keys(row);
   const find = name => { const target = name.toLowerCase(); for(const k of keys){ if(mapKey(k)===target) return row[k]; } for(const k of keys){ if(mapKey(k).includes(target)) return row[k]; } return ''; };
   normalized.Numero = String(find('Numero') || find('id')|| find('numero'));
-  normalized.Nombres = find('Nombres') || '';
-  normalized.Apellidos = find('Apellidos') || '';
-  normalized.Correo = find('Correo') || find('Email') || '';
-  normalized.Telefono = find('Telefono') || find('Phone') || '';
+  normalized.Nombre = find('Nombre') || '';
+  normalized.Categoria = find('Categoría') || find('Categoria') || '';
+  normalized.Area = find('Área') || find('Area') || '';
+  normalized.Asistencia = find('Asistencia') || '';
   return normalized;
 }
-function censorPhone(phone){
-  if(!phone) return '';
-  const s = String(phone).trim();
-  if(!s) return '';
-  const maxKeep = 4;
-  const keep = Math.max(1, Math.min(maxKeep, Math.floor(s.length/2)));
-  return s.slice(0,keep) + '...';
-}
+
 function renderTable(filterText=''){
   const container = document.getElementById('tableContainer');
   if(!participants.length){ container.innerHTML = '<div class="empty">Cargue un CSV para ver participantes</div>'; updateStatus(); return; }
   const ft = filterText.trim().toLowerCase();
-  const rows = participants.filter(p=>!ft || (p.Numero||'').toLowerCase().includes(ft) || (p.Nombres||'').toLowerCase().includes(ft) || (p.Apellidos||'').toLowerCase().includes(ft) || (p.Correo||'').toLowerCase().includes(ft));
-  const html = ['<table><thead><tr><th>Numero</th><th>Nombres</th><th>Apellidos</th><th>Correo</th><th>Telefono</th></tr></thead><tbody>'];
-  for(const r of rows){ const isPrev = historySet.has(String(r.Numero)); 
-    const censEmail = r.Correo;
-    const censPhone = censorPhone(r.Telefono);
-    html.push(`<tr style="${isPrev? 'opacity:0.5':''}"><td>${r.Numero}</td><td>${r.Nombres}</td><td>${r.Apellidos}</td><td>${censEmail}</td><td>${censPhone}</td></tr>`); 
+  const rows = participants.filter(p=>!ft || (p.Numero||'').toLowerCase().includes(ft) || (p.Nombre||'').toLowerCase().includes(ft) || (p.Categoria||'').toLowerCase().includes(ft) || (p.Area||'').toLowerCase().includes(ft));
+  const html = ['<table><thead><tr><th>Numero</th><th>Nombre</th><th>Categoría</th><th>Área</th><th>Asistencia</th></tr></thead><tbody>'];
+  for(const r of rows){ const isPrev = historySet.has(String(r.Numero));
+    html.push(`<tr style="${isPrev? 'opacity:0.5':''}"><td>${r.Numero}</td><td>${r.Nombre}</td><td>${r.Categoria}</td><td>${r.Area}</td><td>${r.Asistencia}</td></tr>`);
   }
   html.push('</tbody></table>');
   container.innerHTML = html.join('');
   updateStatus();
 }
+
 function pickWinners(count, excludeHistory){
   const pool = participants.filter(p=>p.Numero && (!excludeHistory || !historySet.has(String(p.Numero))));
   if(count > pool.length) throw new Error(`No hay suficientes participantes disponibles`);
@@ -81,15 +74,12 @@ function pickWinners(count, excludeHistory){
 
 function showCountdown(){
   return new Promise((resolve)=>{
-    let counter = 5;
+    let counter = 3;
     const html = `
       <div class="lc-countdown">
         <div class="lc-label">Sorteando en...</div>
         <div class="lc-circle" id="lcCircle" aria-hidden="true">
-          <div id="lcCounter" class="lc-number">5</div>
-          <div class="lc-orb" style="left:18%;top:20%;width:10px;height:10px;opacity:0.9"></div>
-          <div class="lc-orb" style="left:82%;top:28%;width:14px;height:14px;opacity:0.8"></div>
-          <div class="lc-orb" style="left:70%;top:72%;width:8px;height:8px;opacity:0.7"></div>
+          <div id="lcCounter" class="lc-number">3</div>
         </div>
       </div>
     `;
@@ -101,28 +91,15 @@ function showCountdown(){
       allowEscapeKey: false,
       didOpen: () => {
         const counterEl = document.getElementById('lcCounter');
-        const circle = document.getElementById('lcCircle');
-        counterEl.classList.add('lc-animate','lc-glow');
         const t = setInterval(()=>{
           counter--;
           if(counter >= 1){
-            counterEl.classList.remove('lc-animate');
-            void counterEl.offsetWidth;
             counterEl.textContent = String(counter);
-            counterEl.classList.add('lc-animate');
-            circle.classList.remove('lc-glow');
-            void circle.offsetWidth;
-            circle.classList.add('lc-glow');
           }
           if(counter < 1){
             clearInterval(t);
-            circle.style.transition = 'transform 220ms ease';
-            circle.style.transform = 'scale(1.06)';
-            setTimeout(()=> {
-              circle.style.transform = 'scale(1)';
-              Swal.close();
-              resolve();
-            }, 220);
+            Swal.close();
+            resolve();
           }
         }, 1000);
       },
@@ -143,9 +120,10 @@ async function performDraw(){
     renderTable(document.getElementById('search').value);
 
     confetti({particleCount: 120, spread: 140, origin: { y: 0.6 }});
+
     const html = winners.map((w,i)=>`<div style="margin:8px 0">
-    <strong style="font-size:16px">#${i+1} ${w.Nombres} ${w.Apellidos}</strong>
-    <div style="font-size:13px;opacity:0.85">${w.Correo}</div>
+    <strong style="font-size:16px">#${i+1} ${w.Nombre}</strong>
+    <div style="font-size:13px;opacity:0.85">${w.Categoria} - ${w.Area} - ${w.Asistencia}</div>
     </div>`).join('');
 
     await Swal.fire({
@@ -159,7 +137,7 @@ async function performDraw(){
 
     drawCounter++;
     const line = `Sorteo ${drawCounter}:\n` + winners.map(w=>
-      `🏆 ${w.Nombres} ${w.Apellidos}`
+      `🏆 ${w.Nombre} | ${w.Categoria} | ${w.Area} | ${w.Asistencia}`
     ).join('\n') + `\n--------------------------------------\n`;
 
     let prevLog = localStorage.getItem(HISTORY_FILE_KEY) || '';
@@ -172,9 +150,9 @@ async function performDraw(){
 
 function downloadHistory(){
   const log = localStorage.getItem(HISTORY_FILE_KEY) || '';
-  if(!log){ 
-    Swal.fire({ icon:'info', title:'Historial vacío', text:'Aún no hay sorteos registrados', customClass:{ popup:'swal2-ios-like' }}); 
-    return; 
+  if(!log){
+    Swal.fire({ icon:'info', title:'Historial vacío', text:'Aún no hay sorteos registrados', customClass:{ popup:'swal2-ios-like' }});
+    return;
   }
   const blob = new Blob([log], {type:'text/plain'});
   const a = document.createElement('a');

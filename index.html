@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Sorteador — UEC</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="app">
@@ -20,7 +20,6 @@
           <div class="subtitle">Importa el listado de usuarios, ejecuta sorteos aleatorios y evita ganadores repetidos.</div>
         </div>
       </div>
-
       <div class="controls">
         <label class="liquid-btn file-label" style="background-color: #494d35f5;" data-tooltip="Cargar participantes">
           <input id="csvfile" type="file" accept="text/csv, .csv">
@@ -30,9 +29,8 @@
         <button id="drawBtn" class="liquid-btn" style="background-color: #6fb25136;" data-tooltip="Iniciar sorteo">🎲</button>
         <button id="downloadHistoryBtn" class="liquid-btn" style="background-color: #4c55d33d;" data-tooltip="Descargar historial">⬇️</button>
         <button id="clearHistoryBtn" class="liquid-btn" style="background-color: #ae00003b" data-tooltip="Borrar historial">🗑️</button>
-        <input id="search" class="input-num" placeholder="Buscar por Nombre, Apellido, Correo o Numero" style="flex:1">
+        <input id="search" class="input-num" placeholder="Buscar por Nombre, Categoría, Área o Numero" style="flex:1">
       </div>
-
       <div class="area">
         <div class="card">
           <h4>Opciones</h4>
@@ -45,7 +43,7 @@
             <label for="excludeHistory" class="small">Excluir ganadores previos</label>
           </div>
           <div class="glass-hero">
-            <div class="liquid" style="font-size:30px; font-weight: unset;">📢</div>
+            <div class="liquid" style="font-size:30px; font-weight: unset;">🛈</div>
             <div>
               <div style="font-weight:700">Estado</div>
               <div id="status" class="small">Sin archivo cargado</div>
@@ -56,7 +54,6 @@
             <div class="history-empty">Aún no hay sorteos registrados</div>
           </div>
         </div>
-
         <div class="card" style="background-color: #0000002e">
           <h4>Participantes</h4>
           <div id="tableContainer" class="table-wrap">
@@ -70,7 +67,6 @@
       </div>
     </div>
   </div>
-
-<script src="app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
